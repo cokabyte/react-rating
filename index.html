@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Rating</title>
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.css">
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css">
+    <!-- Prism -->
+    <link rel="stylesheet" href="node_modules/prismjs/themes/prism.css">
+    <script src="node_modules/prismjs/prism.js"></script>
+    <script src="node_modules/prismjs/components/prism-jsx.min.js"></script>
+    <!-- Babel -->
+    <script src="node_modules/@babel/standalone/babel.min.js"></script>
+    <!-- React -->
+    <script src="node_modules/react/umd/react.development.js"></script>
+    <!-- ReactDOM -->
+    <script src="node_modules/react-dom/umd/react-dom.development.js"></script>
+    <!-- React Rating component -->
+    <script src="lib/react-rating.umd.js"></script>
+    <!-- SVG icons generated with https://icomoon.io/app/ -->
+    <svg id="svg-source" style="display: none;" version="1.1" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <symbol id="icon-star-empty" viewBox="0 0 1024 1024">
+          <title>star-empty</title>
+          <path class="path1" d="M1024 397.050l-353.78-51.408-158.22-320.582-158.216 320.582-353.784 51.408 256 249.538-60.432 352.352 316.432-166.358 316.432 166.358-60.434-352.352 256.002-249.538zM512 753.498l-223.462 117.48 42.676-248.83-180.786-176.222 249.84-36.304 111.732-226.396 111.736 226.396 249.836 36.304-180.788 176.222 42.678 248.83-223.462-117.48z"></path>
+        </symbol>
+        <symbol id="icon-star-full" viewBox="0 0 1024 1024">
+          <title>star-full</title>
+          <path class="path1" d="M1024 397.050l-353.78-51.408-158.22-320.582-158.216 320.582-353.784 51.408 256 249.538-60.432 352.352 316.432-166.358 316.432 166.358-60.434-352.352 256.002-249.538z"></path>
+        </symbol>
+      </defs>
+    </svg>
+    <style type="text/css">
+      .low {
+        color: red;
+      }
+      .medium {
+        color: orange;
+      }
+      .high {
+        color: green;
+      }
+      .icon {
+        width: 26px;
+        height: 26px;
+      }
+      .icon-text {
+        display: inline-block;
+        width: 26px;
+        font-size: 2em;
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Default rating</h3>
+    <div class="rating" id="rating-default"></div>
+    <h3>Reset rating</h3>
+    <div class="rating" id="rating-reset"></div>
+    <h3>Readonly rating</h3>
+    <div class="rating" id="rating-default-readonly"></div>
+    <h3>Readonly fractional rating</h3>
+    <div class="rating" id="rating-default-readonly-fractional"></div>
+    <h3>React svg element rating</h3>
+    <div class="rating" id="rating-svg"></div>
+    <h3>React span element rating</h3>
+    <div class="rating" id="rating-span"></div>
+    <h3>React img element rating</h3>
+    <div class="rating" id="rating-img"></div>
+    <h3>Fontawesome Five Star rating</h3>
+    <div class="rating" id="rating-fontawesome-star"></div>
+    <h3>Fontawesome Thumbs Up/Down rating (showcases background icon hiding)</h3>
+    <div class="rating" id="rating-fontawesome-thumbs"></div>
+    <h3>Bootstrap Five Heart rating</h3>
+    <div class="rating" id="rating-bootstrap-heart"></div>
+    <h3>Fractional rating</h3>
+    <div class="rating" id="rating-fractional"></div>
+    <h3>Alert when rate changes</h3>
+    <div class="rating" id="rating-default-change"></div>
+    <h3>Update a label when rate moves</h3>
+    <span class="rating" id="rating-default-onrate"></span>
+    <span class="label label-default" id="label-onrate"></span>
+    <h3>Update a label when rate moves "quietly"</h3>
+    <span class="rating" id="rating-quiet-onrate"></span>
+    <span class="label label-default" id="label-quiet-onrate"></span>
+    <h3>Colored rating</h3>
+    <span class="rating" id="rating-colored"></span>
+    <h3>Mixed symbols</h3>
+    <div class="rating" id="rating-mixed"></div>
+    <h3>Custom each symbol</h3>
+    <div class="rating" id="rating-custom"></div>
+    <h3>1 to 10 rating</h3>
+    <div class="rating" id="rating-default-1-to-10"></div>
+    <h3>5 to 10 rating</h3>
+    <div class="rating" id="rating-default-5-to-10"></div>
+    <h3>1 to 10 with step 2 (odd numbers)</h3>
+    <div class="rating" id="rating-default-1-to-10-step-2"></div>
+    <h3>10 to 1 with step -2 (odd numbers between [1..10] inverted order)</h3>
+    <div class="rating" id="rating-default-10-to-1-step--2"></div>
+    <h3>Rating with placeholder</h3>
+    <div class="rating" id="rating-placeholder"></div>
+
+    <script type="text/babel">
+      const Rating = ReactRating;
+      const insertCode = function (code, elementId) {
+        document
+          .getElementById(elementId)
+          .insertAdjacentHTML('afterend',
+            '<pre><code>' +
+            Prism.highlight(code, Prism.languages.jsx) +
+            '</code></pre>'
+          );
+      };
+      // ResetRating
+      class ResetRating extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            value: 0,
+            key: new Date().getTime()
+          };
+
+          this.handleClick = this.handleClick.bind(this);
+        }
+
+        handleClick(event) {
+          this.setState({value: undefined, key: new Date().getTime()});
+        }
+
+        
+
+        render() {
+          return (
+            <div>
+              <Rating key={this.state.key} {...this.props} initialRating={this.state.value} />
+              <button onClick={this.handleClick}>Reset</button>
+            </div>
+          );
+        }
+      }
+
+
+      ReactDOM.render(
+        <Rating />
+      , document.getElementById('rating-default'));
+      insertCode('<Rating />', 'rating-default');
+
+      ReactDOM.render(
+        <ResetRating placeholderRating={3} />
+      , document.getElementById('rating-reset'));
+      insertCode(
+`
+class ResetRating extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: 0};
+
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(event) {
+    this.setState({value: undefined});
+  }
+
+  render() {
+    return (
+      <div>
+        <Rating {...this.props} initialRating={this.state.value} />
+        <button onClick={this.handleClick}>Reset</button>
+      </div>
+    );
+  }
+}
+
+<ResetRating placeholderRating={3} />
+`, 'rating-reset');
+
+      ReactDOM.render(
+        <Rating
+          initialRating={3}
+          readonly
+        />
+      , document.getElementById('rating-default-readonly'));
+      insertCode(
+`<Rating
+  initialRating={3}
+  readonly
+/>`, 'rating-default-readonly');
+
+      ReactDOM.render(
+        <Rating
+          initialRating={2.5}
+          readonly
+        />
+      , document.getElementById('rating-default-readonly-fractional'));
+      insertCode(
+`<Rating
+  initialRating={2.5}
+  readonly
+/>`, 'rating-default-readonly-fractional');
+
+      const SVGIcon = (props) =>
+          <svg className={props.className} pointerEvents="none">
+            <use xlinkHref={props.href} />
+          </svg>;
+      ReactDOM.render(
+        <Rating
+          emptySymbol={<SVGIcon href="#icon-star-empty" className="icon" />}
+          fullSymbol={<SVGIcon href="#icon-star-full" className="icon" />}
+        />
+      , document.getElementById('rating-svg'));
+      insertCode(
+`const SVGIcon = (props) =>
+  <svg className={props.className} pointerEvents="none">
+    <use xlinkHref={props.href} />
+  </svg>;
+<Rating
+  emptySymbol={<SVGIcon href="#icon-star-empty" className="icon" />}
+  fullSymbol={<SVGIcon href="#icon-star-full" className="icon" />}
+/>`, 'rating-svg');
+
+      ReactDOM.render(
+        <Rating
+          emptySymbol={<span className="icon-text">-</span>}
+          fullSymbol={[1,2,3,4,5].map(n => <span className="icon-text">{n}</span>)}
+        />
+      , document.getElementById('rating-span'));
+      insertCode(
+`<Rating
+  emptySymbol={<span className="icon-text">-</span>}
+  fullSymbol={[1,2,3,4,5].map(n => <span className="icon-text">{n}</span>)}
+/>`, 'rating-span');
+
+      ReactDOM.render(
+        <Rating
+          emptySymbol={<img src="assets/images/star-empty.png" className="icon" />}
+          fullSymbol={<img src="assets/images/star-full.png" className="icon" />}
+        />
+      , document.getElementById('rating-img'));
+      insertCode(
+`<Rating
+  emptySymbol={<img src="assets/images/star-empty.png" className="icon" />}
+  fullSymbol={<img src="assets/images/star-full.png" className="icon" />}
+/>`, 'rating-img');
+
+      ReactDOM.render(
+        <Rating
+          emptySymbol="fa fa-star-o fa-2x"
+          fullSymbol="fa fa-star fa-2x"
+        />
+      , document.getElementById('rating-fontawesome-star'));
+      insertCode(
+`<Rating
+  emptySymbol="fa fa-star-o fa-2x"
+  fullSymbol="fa fa-star fa-2x"
+/>`, 'rating-fontawesome-star');
+
+      ReactDOM.render(
+        <Rating
+          emptySymbol="fa fa-thumbs-down fa-2x"
+          fullSymbol="fa fa-thumbs-up fa-2x"
+        />
+      , document.getElementById('rating-fontawesome-thumbs'));
+      insertCode(
+`<Rating
+  emptySymbol="fa fa-thumbs-down fa-2x"
+  fullSymbol="fa fa-thumbs-up fa-2x"
+/>`, 'rating-fontawesome-thumbs');
+
+      ReactDOM.render(
+        <Rating
+          emptySymbol="glyphicon glyphicon-heart-empty"
+          fullSymbol="glyphicon glyphicon-heart"
+        />
+      , document.getElementById('rating-bootstrap-heart'));
+      insertCode(
+`<Rating
+  emptySymbol="glyphicon glyphicon-heart-empty"
+  fullSymbol="glyphicon glyphicon-heart"
+/>`, 'rating-bootstrap-heart');
+
+      ReactDOM.render(
+        <Rating
+          emptySymbol="fa fa-star-o fa-2x"
+          fullSymbol="fa fa-star fa-2x"
+          fractions={2}
+        />
+      , document.getElementById('rating-fractional'));
+      insertCode(
+`<Rating
+  emptySymbol="fa fa-star-o fa-2x"
+  fullSymbol="fa fa-star fa-2x"
+  fractions={2}
+/>`, 'rating-fractional');
+
+      ReactDOM.render(
+        <Rating
+          onChange={(rate) => alert(rate)}
+        />
+      , document.getElementById('rating-default-change'));
+      insertCode(
+`<Rating
+  onChange={(rate) => alert(rate)}
+/>`, 'rating-default-change');
+
+      ReactDOM.render(
+        <Rating
+          onHover={(rate) => document.getElementById('label-onrate').innerHTML = rate || ''}
+        />
+      , document.getElementById('rating-default-onrate'));
+      insertCode(
+`<Rating
+  onHover={(rate) => document.getElementById('label-onrate').innerHTML = rate || ''}
+/>`, 'label-onrate');
+
+      ReactDOM.render(
+        <Rating
+          quiet
+          onHover={(rate) => document.getElementById('label-quiet-onrate').innerHTML = rate || ''}
+        />
+      , document.getElementById('rating-quiet-onrate'));
+      insertCode(
+`<Rating
+  quiet
+  onHover={(rate) => document.getElementById('label-quiet-onrate').innerHTML = rate || ''}
+/>`, 'label-quiet-onrate');
+
+      ReactDOM.render(
+        <Rating
+          stop={10}
+        />
+      , document.getElementById('rating-default-1-to-10'));
+      insertCode(
+`<Rating
+  stop={10}
+/>`, 'rating-default-1-to-10');
+
+      ReactDOM.render(
+        <Rating
+          start={4}
+          stop={10}
+        />
+      , document.getElementById('rating-default-5-to-10'));
+      insertCode(
+`<Rating
+  start={4}
+  stop={10}
+/>`, 'rating-default-5-to-10');
+
+      ReactDOM.render(
+        <Rating
+          stop={10}
+          step={2}
+        />
+      , document.getElementById('rating-default-1-to-10-step-2'));
+      insertCode(
+`<Rating
+  stop={10}
+  step={2}
+/>`, 'rating-default-1-to-10-step-2');
+
+      ReactDOM.render(
+        <Rating
+          start={11}
+          stop={1}
+          step={-2}
+        />
+      , document.getElementById('rating-default-10-to-1-step--2'));
+      insertCode(
+`<Rating
+  start={11}
+  stop={1}
+  step={-2}
+/>`, 'rating-default-10-to-1-step--2');
+
+      // Mixing symbols.
+      ReactDOM.render(
+        <Rating
+          emptySymbol={['fa fa-star-o fa-2x', 'fa fa-heart-o fa-2x']}
+          fullSymbol={['fa fa-star fa-2x', 'fa fa-heart fa-2x']}
+        />
+      , document.getElementById('rating-mixed'));
+      insertCode(
+`<Rating
+  emptySymbol={['fa fa-star-o fa-2x', 'fa fa-heart-o fa-2x']}
+  fullSymbol={['fa fa-star fa-2x', 'fa fa-heart fa-2x']}
+/>`, 'rating-mixed');
+
+      ReactDOM.render(
+        <Rating
+          stop={6}
+          emptySymbol={['fa fa-star-o fa-2x low', 'fa fa-star-o fa-2x low',
+            'fa fa-star-o fa-2x medium', 'fa fa-star-o fa-2x medium',
+            'fa fa-star-o fa-2x high', 'fa fa-star-o fa-2x high']}
+          fullSymbol={['fa fa-star fa-2x low', 'fa fa-star fa-2x low',
+            'fa fa-star fa-2x medium', 'fa fa-star fa-2x medium',
+            'fa fa-star fa-2x high', 'fa fa-star fa-2x high']}
+        />
+      , document.getElementById('rating-colored'));
+      insertCode(
+`<Rating
+  stop={6}
+  emptySymbol={['fa fa-star-o fa-2x low', 'fa fa-star-o fa-2x low',
+    'fa fa-star-o fa-2x medium', 'fa fa-star-o fa-2x medium',
+    'fa fa-star-o fa-2x high', 'fa fa-star-o fa-2x high']}
+  fullSymbol={['fa fa-star fa-2x low', 'fa fa-star fa-2x low',
+    'fa fa-star fa-2x medium', 'fa fa-star fa-2x medium',
+    'fa fa-star fa-2x high', 'fa fa-star fa-2x high']}
+/>`, 'rating-colored');
+
+      ReactDOM.render(
+        <Rating
+          stop={4}
+          emptySymbol="fa fa-battery-empty fa-2x"
+          fullSymbol={['fa fa-battery-1 fa-2x', 'fa fa-battery-2 fa-2x',
+            'fa fa-battery-3 fa-2x', 'fa fa-battery-4 fa-2x']}
+        />
+      , document.getElementById('rating-custom'));
+      insertCode(
+`<Rating
+  stop={4}
+  emptySymbol="fa fa-battery-empty fa-2x"
+  fullSymbol={['fa fa-battery-1 fa-2x', 'fa fa-battery-2 fa-2x',
+    'fa fa-battery-3 fa-2x', 'fa fa-battery-4 fa-2x']}
+/>`, 'rating-custom');
+
+      ReactDOM.render(
+        <Rating
+          placeholderRating={3.5}
+          emptySymbol={<img src="assets/images/star-grey.png" className="icon" />}
+          placeholderSymbol={<img src="assets/images/star-red.png" className="icon" />}
+          fullSymbol={<img src="assets/images/star-yellow.png" className="icon" />}
+        />
+      , document.getElementById('rating-placeholder'));
+      insertCode(
+`<Rating
+  placeholderRating={3.5}
+  emptySymbol={<img src="assets/images/star-grey.png" className="icon" />}
+  placeholderSymbol={<img src="assets/images/star-red.png" className="icon" />}
+  fullSymbol={<img src="assets/images/star-yellow.png" className="icon" />}
+/>`, 'rating-placeholder');
+    </script>
+  </body>
+</html>
